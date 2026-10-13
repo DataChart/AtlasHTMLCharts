@@ -1,0 +1,6 @@
+vendor/** linguist-vendored
+examples/data/** linguist-generated
+*.js text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.md text eol=lf

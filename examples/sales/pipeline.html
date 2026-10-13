@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pipeline · Atlas example</title>
+  <link rel="stylesheet" href="../../atlas/atlas.css">
+  <script src="../../vendor/echarts/echarts.min.js"></script>
+  <script src="../../atlas/atlas.js"></script>
+  <script src="../../atlas/visuals.js"></script>
+  <script src="../data/pipeline.js"></script>
+</head>
+<body>
+<script type="application/json" data-atlas>
+{
+  "title": "Pipeline",
+  "subtitle": "Opportunities by source, stage and outcome",
+  "logo": "../../assets/logo.svg",
+  "logoHref": "index.html",
+  "nav": [
+    { "label": "Overview", "href": "index.html" },
+    { "label": "Products", "href": "products.html" },
+    { "label": "Pipeline", "href": "pipeline.html" },
+    { "label": "Order details", "href": "details.html" }
+  ],
+  "data": "pipeline",
+  "fields": {
+    "amount": { "format": "currency" },
+    "opportunityId": { "label": "Opportunity" },
+    "stageIndex": { "label": "Stage #", "format": "integer" }
+  },
+  "filters": [
+    { "type": "dateRange", "field": "created", "label": "Created" },
+    { "type": "buttons", "field": "source" },
+    { "type": "dropdown", "field": "region" },
+    { "type": "search", "fields": ["owner", "opportunityId"], "label": "Owner or ID" }
+  ],
+  "visuals": [
+    { "type": "card", "title": "Opportunities", "value": { "field": "opportunityId", "agg": "count" }, "span": 3 },
+    { "type": "card", "title": "Pipeline value", "value": "amount", "span": 3 },
+    { "type": "gauge", "title": "Average deal size", "value": { "field": "amount", "agg": "avg" }, "target": 40000, "max": 60000, "span": 3 },
+    { "type": "kpi", "title": "Average stage reached", "value": { "field": "stageIndex", "agg": "avg", "format": "decimal" }, "target": 2.5, "trend": "created", "span": 3 },
+    { "type": "sankey", "title": "Opportunity flow", "subtitle": "Source › furthest stage › outcome, by count", "levels": ["source", "stage", "outcome"], "span": 8 },
+    { "type": "funnel", "title": "Stage funnel", "subtitle": "Opportunities that reached each stage", "category": "stage",
+      "order": ["Lead", "Qualified", "Proposal", "Negotiation", "Closed"], "cumulative": true, "span": 4 },
+    { "type": "lineClusteredColumn", "title": "Created opportunities by quarter", "category": "created", "grain": "quarter", "columns": [{ "field": "opportunityId", "agg": "count", "label": "Created" }], "lines": [{ "field": "stageIndex", "agg": "sum", "label": "Stages progressed" }], "span": 6 },
+    { "type": "pie", "title": "Outcome", "category": "outcome", "span": 3 },
+    { "type": "sunburst", "title": "Region › segment", "levels": ["region", "segment"], "value": "amount", "span": 3 }
+  ]
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Visual Gallery · Atlas</title>
+  <link rel="stylesheet" href="../atlas/atlas.css">
+  <script src="../vendor/echarts/echarts.min.js"></script>
+  <script src="../atlas/atlas.js"></script>
+  <script src="../atlas/visuals.js"></script>
+  <script src="../examples/data/sales.js"></script>
+</head>
+<body>
+<!--
+  Every visual type and every filter type, rendered against the demo sales data.
+  Use it as a catalogue: find the visual you want, copy its JSON block into your dashboard.
+  The automated smoke test (tests/smoke.spec.mjs) also renders this page.
+-->
+<script type="application/json" data-atlas>
+{
+  "title": "Visual Gallery",
+  "subtitle": "Every Atlas visual and slicer",
+  "logo": "../assets/logo.svg",
+  "nav": [
+    { "label": "Gallery", "href": "index.html" },
+    { "label": "Sales example", "href": "../examples/sales/index.html" },
+    { "label": "Blank template", "href": "../templates/dashboard.html" }
+  ],
+  "data": "sales",
+  "fields": {
+    "revenue": { "format": "currency" },
+    "cost": { "format": "currency" },
+    "profit": { "format": "currency" },
+    "discount": { "format": "percent" },
+    "orderId": { "label": "Order ID" }
+  },
+  "filters": [
+    { "type": "dateRange", "field": "date", "label": "Date range" },
+    { "type": "dropdown", "field": "region", "label": "Dropdown (multi)" },
+    { "type": "dropdown", "field": "segment", "label": "Dropdown (single)", "multiple": false },
+    { "type": "buttons", "field": "channel", "label": "Buttons" },
+    { "type": "list", "field": "category", "label": "List" },
+    { "type": "range", "field": "units", "label": "Numeric range" },
+    { "type": "search", "fields": ["customer", "city"], "label": "Search" }
+  ],
+  "visuals": [
+    { "type": "section", "title": "Cards & KPIs" },
+    { "type": "card", "title": "card", "value": "revenue", "span": 3 },
+    { "type": "kpi", "title": "kpi", "value": "profit", "target": 10000000, "trend": "date", "span": 3 },
+    { "type": "gauge", "title": "gauge", "value": { "field": "discount", "agg": "avg" }, "target": 0.05, "max": 0.2, "span": 3 },
+    { "type": "multiRowCard", "title": "multiRowCard", "values": ["units", { "field": "orderId", "agg": "count", "label": "Orders" }], "span": 3 },
+
+    { "type": "section", "title": "Bar & column" },
+    { "type": "clusteredBar", "title": "clusteredBar (bar)", "category": "region", "series": "segment", "value": "revenue", "span": 4 },
+    { "type": "stackedBar", "title": "stackedBar", "category": "region", "series": "segment", "value": "revenue", "span": 4 },
+    { "type": "stackedBar100", "title": "stackedBar100", "category": "region", "series": "segment", "value": "revenue", "span": 4 },
+    { "type": "clusteredColumn", "title": "clusteredColumn (column)", "category": "category", "values": ["revenue", "profit"], "span": 4 },
+    { "type": "stackedColumn", "title": "stackedColumn", "category": "date", "grain": "quarter", "series": "category", "value": "revenue", "span": 4 },
+    { "type": "stackedColumn100", "title": "stackedColumn100", "category": "date", "grain": "quarter", "series": "category", "value": "revenue", "span": 4 },
+
+    { "type": "section", "title": "Line & area" },
+    { "type": "line", "title": "line", "category": "date", "grain": "month", "series": "region", "value": "revenue", "span": 6 },
+    { "type": "area", "title": "area", "category": "date", "grain": "month", "value": "profit", "span": 6 },
+    { "type": "stackedArea", "title": "stackedArea", "category": "date", "grain": "month", "series": "channel", "value": "revenue", "span": 6 },
+    { "type": "stackedArea100", "title": "stackedArea100", "category": "date", "grain": "month", "series": "channel", "value": "revenue", "span": 6 },
+    { "type": "lineClusteredColumn", "title": "lineClusteredColumn (combo)", "category": "date", "grain": "quarter", "columns": ["revenue"], "lines": ["profit"], "span": 6 },
+    { "type": "lineStackedColumn", "title": "lineStackedColumn", "category": "date", "grain": "quarter", "series": "channel", "columns": ["revenue"], "lines": ["profit"], "span": 6 },
+
+    { "type": "section", "title": "Part-to-whole" },
+    { "type": "pie", "title": "pie", "category": "channel", "value": "revenue", "span": 4 },
+    { "type": "donut", "title": "donut", "category": "segment", "value": "revenue", "span": 4 },
+    { "type": "drillPie", "title": "drillPie", "subtitle": "Click a slice to drill down", "levels": ["category", "product"], "value": "revenue", "span": 4 },
+    { "type": "drillDonut", "title": "drillDonut", "subtitle": "region › country › city", "levels": ["region", "country", "city"], "value": "revenue", "span": 4 },
+    { "type": "treemap", "title": "treemap", "levels": ["category", "product"], "value": "revenue", "span": 4 },
+    { "type": "sunburst", "title": "sunburst", "levels": ["region", "country"], "value": "revenue", "span": 4 },
+
+    { "type": "section", "title": "Flow & process" },
+    { "type": "sankey", "title": "sankey", "levels": ["channel", "segment", "category"], "value": "revenue", "span": 8 },
+    { "type": "funnel", "title": "funnel", "category": "segment", "value": "revenue", "span": 4 },
+    { "type": "waterfall", "title": "waterfall", "category": "category", "value": "profit", "span": 6 },
+    { "type": "decompositionTree", "title": "decompositionTree", "levels": ["region", "channel", "segment"], "value": "revenue", "span": 6, "height": 360 },
+
+    { "type": "section", "title": "Distribution & correlation" },
+    { "type": "scatter", "title": "scatter / bubble", "details": "customer", "x": "units", "y": "revenue", "size": "profit", "series": "segment", "span": 6 },
+    { "type": "heatmap", "title": "heatmap", "x": "date", "grain": "quarter", "y": "region", "value": "revenue", "labels": true, "span": 6 },
+
+    { "type": "section", "title": "Tables & text" },
+    { "type": "matrix", "title": "matrix", "rows": ["region", "country"], "columns": "channel", "value": "revenue", "dataBars": true, "span": 6 },
+    { "type": "table", "title": "table (grouped)", "groupBy": ["segment"], "columns": ["revenue", "profit", { "field": "orderId", "agg": "count", "label": "Orders" }], "dataBars": ["revenue"], "span": 6 },
+    { "type": "table", "title": "table (raw rows)", "columns": ["orderId", "date", "customer", "product", "revenue"], "limit": 25, "span": 6 },
+    { "type": "text", "title": "text", "text": "**{{distinct:customer}}** customers bought **{{sum:units}}** units for {{sum:revenue|currency}} in the current selection ({{rows}} order lines).", "span": 6 }
+  ]
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,1 @@
+Follow [AGENTS.md](../AGENTS.md) at the repository root. Dashboards are built by editing the JSON config block in a copy of `templates/dashboard.html`; options are documented in `docs/config-reference.md` and validated by `schema/dashboard.schema.json` (`npm run validate`).
