@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40" role="img" aria-label="Atlas">
+  <!-- Placeholder logo. Replace this file (or point "logo" in your config at your own file). -->
+  <rect width="40" height="40" rx="9" fill="#2a78d6"/>
+  <rect x="9" y="21" width="5" height="10" rx="1.5" fill="#fff"/>
+  <rect x="17.5" y="14" width="5" height="17" rx="1.5" fill="#fff"/>
+  <rect x="26" y="9" width="5" height="22" rx="1.5" fill="#fff" opacity=".75"/>
+</svg>

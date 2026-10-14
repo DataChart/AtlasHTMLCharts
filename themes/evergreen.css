@@ -1,0 +1,15 @@
+/*
+ * Theme: Evergreen — warm neutral page, green accent, rounder cards.
+ * A theme only overrides tokens from atlas/atlas.css. Load it AFTER atlas.css.
+ */
+:root {
+  --atlas-page: #f6f5f0;
+  --atlas-accent: #0f7a4f;
+  --atlas-radius: 14px;
+  --atlas-radius-sm: 8px;
+  --atlas-font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) { --atlas-accent: #2fa874; }
+}
+:root[data-theme="dark"] { --atlas-accent: #2fa874; }

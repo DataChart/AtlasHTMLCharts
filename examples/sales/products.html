@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Products · Atlas example</title>
+  <link rel="stylesheet" href="../../atlas/atlas.css">
+  <script src="../../vendor/echarts/echarts.min.js"></script>
+  <script src="../../atlas/atlas.js"></script>
+  <script src="../../atlas/visuals.js"></script>
+  <script src="../data/sales.js"></script>
+</head>
+<body>
+<script type="application/json" data-atlas>
+{
+  "title": "Products",
+  "subtitle": "Mix, margin and customers",
+  "logo": "../../assets/logo.svg",
+  "logoHref": "index.html",
+  "nav": [
+    { "label": "Overview", "href": "index.html" },
+    { "label": "Products", "href": "products.html" },
+    { "label": "Pipeline", "href": "pipeline.html" },
+    { "label": "Order details", "href": "details.html" }
+  ],
+  "data": "sales",
+  "fields": {
+    "revenue": { "format": "currency" },
+    "cost": { "format": "currency" },
+    "profit": { "format": "currency" },
+    "discount": { "format": "percent" }
+  },
+  "filters": [
+    { "type": "dateRange", "field": "date", "label": "Order date", "default": "12m" },
+    { "type": "list", "field": "category" },
+    { "type": "dropdown", "field": "product" },
+    { "type": "range", "field": "revenue", "label": "Order value" }
+  ],
+  "visuals": [
+    { "type": "multiRowCard", "title": "At a glance", "values": ["revenue", "profit", "units", { "field": "customer", "agg": "distinct", "label": "Customers" }], "span": 12 },
+    { "type": "treemap", "title": "Revenue mix", "subtitle": "Click a category to zoom in", "levels": ["category", "product"], "value": "revenue", "span": 6 },
+    { "type": "scatter", "title": "Customers: revenue vs profit", "details": "customer", "x": "revenue", "y": "profit", "size": "units", "series": "segment", "span": 6 },
+    { "type": "heatmap", "title": "Units by product and month", "x": "date", "grain": "month", "y": "product", "value": "units", "span": 12 },
+    { "type": "decompositionTree", "title": "Profit decomposition", "subtitle": "Click a node to expand it", "levels": ["category", "segment", "channel"], "value": "profit", "span": 12 },
+    { "type": "stackedBar100", "title": "Channel share by product", "category": "product", "series": "channel", "value": "revenue", "span": 6 },
+    { "type": "table", "title": "Product summary", "groupBy": "product", "columns": ["revenue", "profit", "units", { "field": "discount", "agg": "avg", "label": "Avg. discount" }], "sort": { "field": "revenue", "dir": "desc" }, "dataBars": ["revenue"], "span": 6 }
+  ]
+}
+</script>
+</body>
+</html>

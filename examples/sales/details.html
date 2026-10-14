@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Order details · Atlas example</title>
+  <link rel="stylesheet" href="../../atlas/atlas.css">
+  <script src="../../vendor/echarts/echarts.min.js"></script>
+  <script src="../../atlas/atlas.js"></script>
+  <script src="../../atlas/visuals.js"></script>
+  <script src="../data/sales.js"></script>
+</head>
+<body>
+<script type="application/json" data-atlas>
+{
+  "title": "Order details",
+  "subtitle": "Drill-through target: opened filtered from the Overview page",
+  "logo": "../../assets/logo.svg",
+  "logoHref": "index.html",
+  "nav": [
+    { "label": "Overview", "href": "index.html" },
+    { "label": "Products", "href": "products.html" },
+    { "label": "Pipeline", "href": "pipeline.html" },
+    { "label": "Order details", "href": "details.html" }
+  ],
+  "data": "sales",
+  "fields": {
+    "revenue": { "format": "currency" },
+    "cost": { "format": "currency" },
+    "profit": { "format": "currency" },
+    "discount": { "format": "percent" },
+    "orderId": { "label": "Order ID" }
+  },
+  "filters": [
+    { "type": "dateRange", "field": "date", "label": "Order date" },
+    { "type": "dropdown", "field": "region" },
+    { "type": "search", "fields": ["customer", "orderId", "city"], "label": "Search" }
+  ],
+  "visuals": [
+    { "type": "card", "title": "Orders", "value": { "field": "orderId", "agg": "count" }, "span": 4 },
+    { "type": "card", "title": "Revenue", "value": "revenue", "span": 4 },
+    { "type": "card", "title": "Profit", "value": "profit", "span": 4 },
+    { "type": "table", "title": "Orders", "columns": ["orderId", "date", "city", "customer", "product", "units", "discount", "revenue", "profit"],
+      "sort": { "field": "date", "dir": "desc" }, "totals": true, "limit": 200, "span": 12 }
+  ]
+}
+</script>
+</body>
+</html>

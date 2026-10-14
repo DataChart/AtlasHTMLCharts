@@ -1,0 +1,659 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/DataChart/AtlasHTMLCharts/schema/dashboard.schema.json",
+  "title": "Atlas dashboard config",
+  "description": "The JSON inside <script type=\"application/json\" data-atlas>. See docs/config-reference.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string",
+      "description": "Shown next to the logo; also the file name for downloads."
+    },
+    "subtitle": {
+      "type": "string"
+    },
+    "logo": {
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "const": false
+        }
+      ],
+      "description": "Path to the logo image (top left). false hides it."
+    },
+    "logoAlt": {
+      "type": "string"
+    },
+    "logoHref": {
+      "type": "string"
+    },
+    "nav": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "label",
+          "href"
+        ],
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "href": {
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "header": {
+      "type": "boolean"
+    },
+    "toolbar": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "upload": {
+          "type": "boolean"
+        },
+        "download": {
+          "type": "boolean"
+        },
+        "print": {
+          "type": "boolean"
+        },
+        "theme": {
+          "type": "boolean"
+        },
+        "uploadLabel": {
+          "type": "string"
+        },
+        "downloadLabel": {
+          "type": "string"
+        },
+        "printLabel": {
+          "type": "string"
+        },
+        "custom": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "label",
+              "href"
+            ],
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "href": {
+                "type": "string"
+              },
+              "target": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "data": {
+      "oneOf": [
+        {
+          "type": "string",
+          "description": "Name passed to Atlas.registerData()."
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      ]
+    },
+    "dataName": {
+      "type": "string"
+    },
+    "locale": {
+      "type": "string"
+    },
+    "currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$"
+    },
+    "renderer": {
+      "enum": [
+        "canvas",
+        "svg"
+      ]
+    },
+    "crossFilter": {
+      "type": "boolean"
+    },
+    "fields": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "string",
+              "number",
+              "date"
+            ]
+          },
+          "format": {
+            "$ref": "#/$defs/format"
+          }
+        }
+      }
+    },
+    "filters": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/filter"
+      }
+    },
+    "visuals": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/visual"
+      }
+    }
+  },
+  "$defs": {
+    "agg": {
+      "enum": [
+        "sum",
+        "avg",
+        "average",
+        "min",
+        "max",
+        "median",
+        "count",
+        "distinct",
+        "countDistinct"
+      ]
+    },
+    "format": {
+      "type": "string",
+      "description": "number | integer | decimal | currency | compactCurrency | percent | compact | date | month | datetime | text, or a name registered with Atlas.registerFormat()."
+    },
+    "measure": {
+      "oneOf": [
+        {
+          "type": "string",
+          "description": "Field name; aggregated with sum (numbers) or count (text)."
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "field"
+          ],
+          "properties": {
+            "field": {
+              "type": "string"
+            },
+            "agg": {
+              "$ref": "#/$defs/agg"
+            },
+            "label": {
+              "type": "string"
+            },
+            "format": {
+              "$ref": "#/$defs/format"
+            }
+          }
+        }
+      ]
+    },
+    "grain": {
+      "enum": [
+        "day",
+        "week",
+        "month",
+        "quarter",
+        "year"
+      ]
+    },
+    "filter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "dropdown",
+            "list",
+            "buttons",
+            "dateRange",
+            "range",
+            "search"
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "field": {
+          "type": "string"
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "label": {
+          "type": "string"
+        },
+        "multiple": {
+          "type": "boolean"
+        },
+        "options": {
+          "type": "array"
+        },
+        "allLabel": {
+          "type": "string"
+        },
+        "placeholder": {
+          "type": "string"
+        },
+        "step": {
+          "type": "number"
+        },
+        "default": {
+          "description": "dropdown/list/buttons: value or array. dateRange: all|7d|30d|90d|12m|mtd|qtd|ytd or {from,to}. range: {min,max}. search: text."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "search"
+              }
+            }
+          },
+          "then": {
+            "anyOf": [
+              {
+                "required": [
+                  "field"
+                ]
+              },
+              {
+                "required": [
+                  "fields"
+                ]
+              }
+            ]
+          },
+          "else": {
+            "required": [
+              "field"
+            ]
+          }
+        }
+      ]
+    },
+    "visual": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "bar",
+            "clusteredBar",
+            "stackedBar",
+            "stackedBar100",
+            "column",
+            "clusteredColumn",
+            "stackedColumn",
+            "stackedColumn100",
+            "line",
+            "area",
+            "stackedArea",
+            "stackedArea100",
+            "combo",
+            "lineClusteredColumn",
+            "lineStackedColumn",
+            "waterfall",
+            "funnel",
+            "pie",
+            "donut",
+            "drillPie",
+            "drillDonut",
+            "treemap",
+            "sunburst",
+            "decompositionTree",
+            "sankey",
+            "scatter",
+            "bubble",
+            "heatmap",
+            "gauge",
+            "card",
+            "multiRowCard",
+            "kpi",
+            "table",
+            "matrix",
+            "text",
+            "html",
+            "section"
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "subtitle": {
+          "type": "string"
+        },
+        "span": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12,
+          "description": "Width in 12-column grid units."
+        },
+        "height": {
+          "oneOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "actions": {
+          "type": "boolean"
+        },
+        "filter": {
+          "type": "object",
+          "additionalProperties": {
+            "oneOf": [
+              {
+                "type": [
+                  "string",
+                  "number",
+                  "boolean"
+                ]
+              },
+              {
+                "type": "array"
+              }
+            ]
+          },
+          "description": "Visual-level filter: {field: value | [values]}."
+        },
+        "category": {
+          "type": "string"
+        },
+        "grain": {
+          "$ref": "#/$defs/grain"
+        },
+        "series": {
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/measure"
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/measure"
+          }
+        },
+        "agg": {
+          "$ref": "#/$defs/agg"
+        },
+        "format": {
+          "$ref": "#/$defs/format"
+        },
+        "sort": {
+          "description": "desc | asc | category | none | [ordered keys] — or {field, dir} for tables."
+        },
+        "top": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "maxSeries": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8
+        },
+        "stack": {
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "const": "percent"
+            }
+          ]
+        },
+        "labels": {
+          "type": "boolean"
+        },
+        "smooth": {
+          "type": "boolean"
+        },
+        "legend": {
+          "type": "boolean"
+        },
+        "columns": {
+          "description": "combo: column measures. table: columns (fields or measures). matrix: column field."
+        },
+        "lines": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/measure"
+          }
+        },
+        "levels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "rootLabel": {
+          "type": "string"
+        },
+        "donut": {
+          "type": "boolean"
+        },
+        "drillThrough": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "object",
+              "required": [
+                "href"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "href": {
+                  "type": "string"
+                },
+                "keepFilters": {
+                  "type": "boolean"
+                }
+              }
+            }
+          ]
+        },
+        "crossFilter": {
+          "type": "boolean"
+        },
+        "source": {
+          "type": "string"
+        },
+        "target": {
+          "oneOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/$defs/measure"
+            }
+          ]
+        },
+        "nodeAlign": {
+          "enum": [
+            "justify",
+            "left",
+            "right"
+          ]
+        },
+        "order": {
+          "type": "array"
+        },
+        "cumulative": {
+          "type": "boolean"
+        },
+        "total": {
+          "type": "boolean"
+        },
+        "totalLabel": {
+          "type": "string"
+        },
+        "increaseLabel": {
+          "type": "string"
+        },
+        "decreaseLabel": {
+          "type": "string"
+        },
+        "x": {
+          "$ref": "#/$defs/measure"
+        },
+        "y": {
+          "$ref": "#/$defs/measure"
+        },
+        "size": {
+          "$ref": "#/$defs/measure"
+        },
+        "details": {
+          "type": "string"
+        },
+        "xOrder": {
+          "type": "array"
+        },
+        "yOrder": {
+          "type": "array"
+        },
+        "min": {
+          "type": "number"
+        },
+        "max": {
+          "oneOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/$defs/measure"
+            }
+          ]
+        },
+        "label": {
+          "type": "string"
+        },
+        "trend": {
+          "type": "string"
+        },
+        "higherIsBetter": {
+          "type": "boolean"
+        },
+        "goodLabel": {
+          "type": "string"
+        },
+        "badLabel": {
+          "type": "string"
+        },
+        "groupBy": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1
+            }
+          ]
+        },
+        "totals": {
+          "type": "boolean"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "dataBars": {
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        "rows": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "columnOrder": {
+          "type": "array"
+        },
+        "text": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        "html": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

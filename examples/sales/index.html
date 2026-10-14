@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sales Overview · Atlas example</title>
+  <link rel="stylesheet" href="../../atlas/atlas.css">
+  <script src="../../vendor/echarts/echarts.min.js"></script>
+  <script src="../../atlas/atlas.js"></script>
+  <script src="../../atlas/visuals.js"></script>
+  <script src="../data/sales.js"></script>
+</head>
+<body>
+<script type="application/json" data-atlas>
+{
+  "title": "Sales Overview",
+  "subtitle": "Orders Jan 2024 – Dec 2025",
+  "logo": "../../assets/logo.svg",
+  "logoHref": "index.html",
+  "nav": [
+    { "label": "Overview", "href": "index.html" },
+    { "label": "Products", "href": "products.html" },
+    { "label": "Pipeline", "href": "pipeline.html" },
+    { "label": "Order details", "href": "details.html" }
+  ],
+  "data": "sales",
+  "currency": "USD",
+  "fields": {
+    "revenue": { "format": "currency" },
+    "cost": { "format": "currency" },
+    "profit": { "format": "currency" },
+    "discount": { "format": "percent" },
+    "orderId": { "label": "Order ID" }
+  },
+  "filters": [
+    { "type": "dateRange", "field": "date", "label": "Order date" },
+    { "type": "dropdown", "field": "region" },
+    { "type": "dropdown", "field": "segment" },
+    { "type": "buttons", "field": "channel" }
+  ],
+  "visuals": [
+    { "type": "kpi", "title": "Revenue", "value": "revenue", "target": 16000000, "trend": "date", "span": 3 },
+    { "type": "card", "title": "Profit", "value": "profit", "span": 3 },
+    { "type": "card", "title": "Orders", "value": { "field": "orderId", "agg": "distinct" }, "span": 3 },
+    { "type": "card", "title": "Avg. discount", "value": { "field": "discount", "agg": "avg" }, "span": 3 },
+
+    { "type": "area", "title": "Revenue by month", "category": "date", "grain": "month", "value": "revenue", "span": 8 },
+    { "type": "drillDonut", "title": "Revenue by geography", "subtitle": "Click to drill region › country › city; a city opens its orders",
+      "levels": ["region", "country", "city"], "value": "revenue", "drillThrough": { "href": "details.html" }, "span": 4 },
+
+    { "type": "stackedColumn", "title": "Revenue by quarter and channel", "category": "date", "grain": "quarter", "series": "channel", "value": "revenue", "span": 6 },
+    { "type": "bar", "title": "Top products", "category": "product", "value": "revenue", "labels": true, "span": 6 },
+
+    { "type": "waterfall", "title": "Profit bridge by category", "category": "category", "value": "profit", "span": 6 },
+    { "type": "text", "title": "Summary", "span": 6,
+      "text": "Revenue for the current selection is {{sum:revenue|currency}} from {{distinct:orderId}} orders, with profit of {{sum:profit|currency}}.\n\nThe average discount given was {{avg:discount|percent}}. Click any bar, slice or segment to cross-filter the page; use the chip above the charts to clear it." },
+
+    { "type": "matrix", "title": "Revenue by region and quarter", "rows": ["region"], "columns": "date", "grain": "quarter", "value": "revenue", "span": 12 }
+  ]
+}
+</script>
+</body>
+</html>
