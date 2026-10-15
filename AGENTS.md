@@ -94,6 +94,7 @@ dashboards/            where users keep their own dashboards
 ```bash
 npm install          # dev tools only (validator + browser tests); dashboards need nothing installed
 npm run validate     # schema + file-reference check for every dashboard page
-npm test             # validate + Playwright browser tests
+npm test             # validate + Playwright tests in Chromium, Firefox and WebKit
+npm run test:chromium  # the same, Chromium only (fastest local check)
 npm run serve        # optional local server on http://localhost:8080
 ```
