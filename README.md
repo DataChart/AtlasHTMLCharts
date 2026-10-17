@@ -100,6 +100,59 @@ Browse them all in [`gallery/index.html`](gallery/index.html).
 
 ---
 
+## Data size and the data it suits
+
+Atlas loads the whole table into the browser and re-aggregates it on every filter click. There is no server, no
+database and no row sampling, so the size of the data is the main limit. As a rule of thumb, keep a dashboard's
+data **under about 200,000 rows and about 20 MB**, whichever comes first.
+
+**Estimate the size before you build:** `rows × columns × bytes per value`. Typical bytes per value in a data file:
+
+| Value | Bytes | Example |
+|---|---|---|
+| Number | 4–10 | `1080`, `862.89` |
+| ISO date | 12 | `"2024-01-01"` |
+| Short text (category, ID) | 10–20 | `"Europe"`, `"SO-10452"` |
+
+For example, 200,000 rows × 15 columns × 10 bytes ≈ 30 MB, which is past the size budget even though it is
+at the row budget. So the wider the table, the fewer rows fit: at 15 columns, 20 MB is about 130,000 rows.
+These figures assume the compact `{ columns, rows }` data file (see [docs/data.md](docs/data.md)); a data file
+of row objects repeats every column name on every row and is roughly twice as large.
+
+**What to expect.** Measured with the 4-page sales example (15 columns, 12 visuals on the page) in desktop Chromium:
+
+| Rows | Data file | Open the page | Each filter click | Browser memory |
+|---|---|---|---|---|
+| 25,000 | 4 MB | under 1 s | 0.1 s | 40 MB |
+| 100,000 | 15 MB | 1.5 s | 0.3 s | 120 MB |
+| 200,000 | 30 MB | 2.3 s | 0.6 s | 180 MB |
+| 500,000 | 75 MB | 5 s | 1.6 s | 440 MB |
+| 1,000,000 | 150 MB | 11 s | 4 s | 1 GB |
+
+Up to about 50,000 rows a dashboard feels instant. Around 200,000 rows it is usable but each click lags.
+Past 500,000 rows, aggregate the data before it reaches the page. Older laptops and phones are slower than these
+numbers, and pages with more visuals take longer per click.
+
+**Works best for**
+- One flat, long table per page: one row per order, ticket, invoice, shipment or event, with a date column.
+- Measures that add up (amounts, counts, hours) sliced by a handful of low-cardinality dimensions
+  (region, channel, status, product line). Series and pie slices past the top few fold into "Other".
+- Daily or monthly operational and management reporting, refreshed by replacing the data file.
+
+**Plan around these**
+- **Pre-aggregate large history.** For multi-year transaction logs, export one row per day (or week) per
+  dimension combination instead of one row per transaction. It is usually a 10–100× reduction and every chart
+  still works.
+- **Raw scatter plots** draw one point per row and roughly double the memory and click time at 100,000 rows or
+  more. Set `details` so the chart plots one point per customer, product or other entity.
+- **Tables show the first rows only:** 100 for a `table` by default (change it with `limit`) and 500 for a
+  `matrix`. Download CSV gives every row.
+- **No joins or multiple tables.** Join and clean data in your database, Power Query or a script first.
+- **Not for streaming or real-time data,** and not for data that must stay off the viewer's machine: everyone who
+  opens the page can download every row in its data file.
+
+---
+
 ## Screenshots
 
 | Pipeline: Sankey, funnel, gauge | Products (dark mode): treemap, scatter, heatmap |
