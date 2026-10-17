@@ -8,8 +8,13 @@ on:
 permissions:
   contents: read
 
+# A newer push to the same branch or PR supersedes the running checks.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  test:
+  validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,13 +25,28 @@ jobs:
       - run: npm ci
       - name: Validate dashboard configs
         run: npm run validate
-      - name: Install Chromium
-        run: npx playwright install --with-deps chromium
+
+  browser-tests:
+    name: browser tests (${{ matrix.browser }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Install ${{ matrix.browser }}
+        run: npx playwright install --with-deps ${{ matrix.browser }}
       - name: Browser tests
-        run: npx playwright test
+        run: npx playwright test --project=${{ matrix.browser }}
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: playwright-results
+          name: playwright-results-${{ matrix.browser }}
           path: test-results/
           retention-days: 7

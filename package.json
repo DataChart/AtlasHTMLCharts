@@ -3,14 +3,36 @@
   "version": "0.1.0",
   "description": "Template framework for building business dashboards as plain HTML files: config-driven, no build step, AI-friendly.",
   "license": "MIT",
+  "author": "DataChart",
+  "homepage": "https://github.com/DataChart/AtlasHTMLCharts#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DataChart/AtlasHTMLCharts.git"
+  },
+  "bugs": {
+    "url": "https://github.com/DataChart/AtlasHTMLCharts/issues"
+  },
+  "keywords": [
+    "dashboard",
+    "html",
+    "charts",
+    "echarts",
+    "business-intelligence",
+    "no-build",
+    "templates"
+  ],
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "validate": "node scripts/validate.mjs",
     "test": "npm run validate && playwright test",
     "data": "node scripts/generate-sample-data.mjs",
     "serve": "node scripts/serve.mjs",
-    "csv": "node scripts/csv-to-data.mjs"
+    "csv": "node scripts/csv-to-data.mjs",
+    "test:chromium": "npm run validate && playwright test --project=chromium"
   },
   "devDependencies": {
     "@playwright/test": "1.56.1",

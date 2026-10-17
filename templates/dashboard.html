@@ -4,6 +4,7 @@
   ========================
   1. Copy this file to /dashboards/<your-name>.html (keeps the relative paths below working).
   2. Point the data <script> at your data file (see docs/data.md), or remove it and use the Upload button.
+     Until you do, the page shows the bundled starter data, so the copy works straight away.
   3. Edit the JSON config block: title, logo, nav, filters, visuals.
   4. Open the file in a browser. No build step, no server.
 
@@ -27,7 +28,7 @@
   <!-- <link rel="stylesheet" href="../themes/evergreen.css"> -->
 
   <!-- DATA: one or more files that call Atlas.registerData("name", rows) -->
-  <script src="starter-data.js"></script>
+  <script src="../templates/starter-data.js"></script>
 </head>
 <body>
 <!-- CONFIG: everything on the page is generated from this block. It must be valid JSON. -->
@@ -37,7 +38,7 @@
   "subtitle": "Ticket volume, resolution time and satisfaction",
   "logo": "../assets/logo.svg",
   "nav": [
-    { "label": "Overview", "href": "dashboard.html" },
+    { "label": "Overview", "href": "#" },
     { "label": "Gallery", "href": "../gallery/index.html" }
   ],
   "toolbar": { "upload": true, "download": true, "print": true, "theme": true },
