@@ -70,6 +70,49 @@ test('Escape closes an open menu and returns focus to its button', async ({ page
   await expect(menu.locator('summary')).toBeFocused();
 });
 
+test('the download menu works from the keyboard alone', async ({ page }) => {
+  await open(page, 'examples/sales/index.html');
+  const menu = page.locator('.atlas-menu');
+  const items = menu.getByRole('menuitem');
+  await menu.locator('summary').focus();
+  await page.keyboard.press('ArrowDown');
+  await expect(menu).toHaveAttribute('open', '');
+  await expect(items.first()).toBeFocused();
+  await page.keyboard.press('ArrowDown');
+  await expect(items.nth(1)).toBeFocused();
+  await page.keyboard.press('End');
+  await expect(items.last()).toBeFocused();
+  await page.keyboard.press('ArrowDown');
+  await expect(items.first()).toBeFocused();
+  await page.keyboard.press('ArrowUp');
+  await expect(items.last()).toBeFocused();
+  const [cfg] = await Promise.all([page.waitForEvent('download'), page.keyboard.press('Enter')]);
+  expect(cfg.suggestedFilename()).toBe('sales-overview.atlas.json');
+  await expect(menu).not.toHaveAttribute('open', '');
+  await expect(menu.locator('summary')).toBeFocused();
+});
+
+test('the multi-select slicer works from the keyboard alone', async ({ page }) => {
+  await open(page, 'examples/sales/index.html');
+  const dd = page.locator('.atlas-filter', { hasText: 'Region' }).locator('details');
+  const summary = dd.locator('summary');
+  await expect(summary).toHaveAccessibleName(/^Region\s+All$/);
+  await summary.focus();
+  await page.keyboard.press('Enter');
+  await expect(dd).toHaveAttribute('open', '');
+  const boxes = dd.locator('input[type=checkbox]');
+  await expect(boxes.first()).toBeFocused();
+  await page.keyboard.press('ArrowDown');
+  await expect(boxes.nth(1)).toBeFocused();
+  await page.keyboard.press('Space');
+  await expect(boxes.nth(1)).toBeChecked();
+  await expect(summary).not.toContainText('All');
+  // Tabbing past the last control leaves the popup and closes it.
+  await dd.getByRole('button', { name: 'Clear' }).focus();
+  await page.keyboard.press('Tab');
+  await expect(dd).not.toHaveAttribute('open', '');
+});
+
 test('stacked series values match a direct sum', async ({ page }) => {
   await open(page, 'examples/sales/index.html');
   const r = await page.evaluate(() => {
