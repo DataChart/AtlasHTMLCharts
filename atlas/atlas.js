@@ -1389,6 +1389,9 @@
     return rec.chart;
   };
   function toPx(v) { return typeof v === 'number' ? v + 'px' : v; }
+  function prefersReducedMotion() {
+    return !!(global.matchMedia && global.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  }
 
   VC.baseOption = function () {
     var t = this.theme;
@@ -1396,6 +1399,8 @@
       color: t.palette,
       backgroundColor: 'transparent',
       textStyle: { fontFamily: t.font, color: t.ink2 },
+      // Viewers who ask their system for less motion get charts that appear without animating.
+      animation: !prefersReducedMotion(),
       animationDuration: 350,
       tooltip: {
         backgroundColor: t.surface, borderColor: t.border, borderWidth: 1, padding: [8, 10],

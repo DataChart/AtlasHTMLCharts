@@ -196,3 +196,13 @@ test('a bad field name shows a readable error instead of breaking the page', asy
   await expect(visual(page, 'Broken').locator('[role=alert]')).toContainText('Field not found in data: nope');
   await expect(visual(page, 'Fine').locator('.atlas-card__value')).toBeVisible();
 });
+
+for (const reducedMotion of ['reduce', 'no-preference']) {
+  test(`charts animate only without a reduced-motion preference: ${reducedMotion}`, async ({ page }) => {
+    await page.emulateMedia({ reducedMotion });
+    await open(page, 'examples/sales/index.html');
+    const el = visual(page, 'Revenue by quarter and channel').locator('.atlas-chart').first();
+    const animation = await el.evaluate((node) => window.echarts.getInstanceByDom(node).getOption().animation);
+    expect(animation).toBe(reducedMotion !== 'reduce');
+  });
+}

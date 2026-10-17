@@ -26,7 +26,7 @@ so the same request produces the same quality of dashboard every time.
 - **Interactive like a BI tool.** Click to cross-filter, drill down in place, drill through to detail pages,
   share filtered views as URLs.
 - **Accessible and printable.** Every chart has a data-table view; colours are colour-blind-safe in light and dark mode;
-  print/PDF output lists the active filters.
+  charts stay still for viewers who turn on reduced motion; print/PDF output lists the active filters.
 - **AI-ready.** [`AGENTS.md`](AGENTS.md) tells an assistant exactly how to build pages; [`prompts/`](prompts/) has
   ready-made prompts for new dashboards, Power BI ports, themes and reviews.
 

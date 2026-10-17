@@ -6,6 +6,7 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Fixed
+- Charts no longer animate when the viewer's system asks for reduced motion (`prefers-reduced-motion: reduce`).
 - A copy of `templates/dashboard.html` in `dashboards/` now works unchanged: it loads the starter data from
   `../templates/starter-data.js` and its nav link points at the page itself.
 - Date-time values such as `2024-01-05 13:45` parse in Safari (they were read as blank), and times without a zone
