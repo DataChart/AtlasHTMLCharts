@@ -555,7 +555,7 @@
       });
     }
     if (!points.length) return ctx.empty();
-    var maxSize = sm ? Math.max.apply(null, points.map(function (p) { return Math.abs(p.size) || 0; })) || 1 : 1;
+    var maxSize = sm ? u.extreme(points.map(function (p) { return Math.abs(p.size) || 0; }), 1) || 1 : 1;
     var groups = new Map();
     var cap = c.maxSeries || 3;
     var ranked = c.series ? Array.from(u.groupBy(points, function (p) { return p.group; }).entries())

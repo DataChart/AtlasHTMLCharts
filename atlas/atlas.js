@@ -192,9 +192,16 @@
   function parseDate(v) {
     if (v == null || v === '') return null;
     if (v instanceof Date) return isNaN(v) ? null : v;
-    var s = String(v);
-    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
-    if (m) return new Date(+m[1], +m[2] - 1, +m[3]);
+    var s = String(v).trim();
+    // Parse ISO-style dates by hand: Safari's Date() rejects "2024-01-05 13:45" and some engines read
+    // "2024-01-05T13:45" (no zone) as UTC. Without a zone the time is local, as the data author meant.
+    var m = /^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2})(?::(\d{2})(?:\.(\d+))?)?(Z|[+-]\d{2}:?\d{2})?)?$/.exec(s);
+    if (m) {
+      var ms = m[7] ? Math.round(+('0.' + m[7]) * 1000) : 0;
+      if (!m[8]) return new Date(+m[1], +m[2] - 1, +m[3], +(m[4] || 0), +(m[5] || 0), +(m[6] || 0), ms);
+      var off = m[8] === 'Z' ? 0 : (m[8][0] === '-' ? -1 : 1) * (+m[8].slice(1, 3) * 60 + +m[8].slice(-2));
+      return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +(m[6] || 0), ms) - off * 60000);
+    }
     var d = new Date(s);
     return isNaN(d) ? null : d;
   }
@@ -299,8 +306,8 @@
       vals.forEach(function (v) { if (typeof v === 'number') { s += v; n++; } });
       return n ? s / n : null;
     },
-    min: function (vals) { var n = vals.filter(isNum); return n.length ? Math.min.apply(null, n) : null; },
-    max: function (vals) { var n = vals.filter(isNum); return n.length ? Math.max.apply(null, n) : null; },
+    min: function (vals) { return extreme(vals, -1); },
+    max: function (vals) { return extreme(vals, 1); },
     median: function (vals) {
       var n = vals.filter(isNum).sort(function (a, b) { return a - b; });
       if (!n.length) return null;
@@ -317,6 +324,18 @@
   AGGREGATES.average = AGGREGATES.avg;
   AGGREGATES.countDistinct = AGGREGATES.distinct;
   function isNum(v) { return typeof v === 'number' && !isNaN(v); }
+  /**
+   * Largest (sign 1) or smallest (sign -1) number in vals, or null. A loop rather than Math.max.apply,
+   * which throws a RangeError in Safari once an array passes 65,536 items.
+   */
+  function extreme(vals, sign) {
+    var best = null;
+    for (var i = 0; i < vals.length; i++) {
+      var v = vals[i];
+      if (isNum(v) && (best === null || (sign > 0 ? v > best : v < best))) best = v;
+    }
+    return best;
+  }
 
   function groupBy(rows, keyFn) {
     var map = new Map();
@@ -449,19 +468,28 @@
 
   /* ---------------- Filtering ---------------- */
 
+  /**
+   * Rows after slicers, page (URL / drill-through) filters and the cross-filter. The cross-filter is not
+   * applied to the visual that set it (visualId), so that visual keeps showing every category.
+   */
   Dashboard.prototype.filteredRows = function (visualId) {
+    var rows = this._sliced || this.slicedRows();
+    var cross = this.cross && this.cross.source !== visualId ? this.cross : null;
+    return cross ? rows.filter(function (r) { return matchValue(r, cross); }) : rows;
+  };
+
+  /** Rows after slicers and page filters only (no cross-filter). */
+  Dashboard.prototype.slicedRows = function () {
     var self = this;
     var active = (this.config.filters || []).map(function (f, i) {
       var id = filterId(f, i);
       return { def: f, state: self.filterState[id] };
     }).filter(function (x) { return isActive(x.def, x.state); });
-    var cross = this.cross && this.cross.source !== visualId ? this.cross : null;
     var pageF = this.pageFilters;
-    if (!active.length && !cross && !pageF.length) return this.rows;
+    if (!active.length && !pageF.length) return this.rows;
     return this.rows.filter(function (r) {
       for (var i = 0; i < active.length; i++) if (!matchFilter(r, active[i].def, active[i].state)) return false;
       for (var j = 0; j < pageF.length; j++) if (!matchValue(r, pageF[j])) return false;
-      if (cross && !matchValue(r, cross)) return false;
       return true;
     });
   };
@@ -567,11 +595,20 @@
         if (!d.contains(e.target)) d.removeAttribute('open');
       });
     });
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape' && e.key !== 'Esc') return;
+      document.querySelectorAll('details.atlas-menu[open], details.atlas-dropdown[open]').forEach(function (d) {
+        var focusInside = d.contains(document.activeElement);
+        d.removeAttribute('open');
+        if (focusInside) d.querySelector('summary').focus();
+      });
+    });
     if (c.toolbar.upload !== false) enableDrop(this);
     if (global.matchMedia) {
       var mq = global.matchMedia('(prefers-color-scheme: dark)');
       var onChange = function () { self.refresh(); };
       if (mq.addEventListener) mq.addEventListener('change', onChange);
+      else if (mq.addListener) mq.addListener(onChange); // Safari < 14
     }
   };
 
@@ -1074,7 +1111,13 @@
     var self = this;
     this.renderChips();
     var tokens = themeTokens();
-    this.records.forEach(function (rec) { self.renderVisual(rec, tokens); });
+    // Slicers are applied once and shared by every visual during this pass.
+    this._sliced = this.slicedRows();
+    try {
+      this.records.forEach(function (rec) { self.renderVisual(rec, tokens); });
+    } finally {
+      this._sliced = null;
+    }
   };
 
   Dashboard.prototype.resize = function () {
@@ -1251,13 +1294,15 @@
         sKeyFn = function (r) { var k = sdim.key(r); return keepS.has(k) ? k : OTHER; };
         sKeys = sKeys.slice(0, maxSeries - 1).concat([OTHER]);
       }
+      // One pass per category bucket (not one filter per category × series cell).
+      var cells = keys.map(function (k) { return groupBy(groups.get(k) || [], sKeyFn); });
       sKeys.forEach(function (sk, si) {
         series.push({
           name: sdim.label(sk), key: sk, measure: m,
           color: sdim.isDate ? self.theme.palette[si % 8] : self.colorFor(seriesField, sk),
-          values: keys.map(function (k) {
-            var bucket = (groups.get(k) || []).filter(function (r) { return sKeyFn(r) === sk; });
-            return bucket.length ? self.aggregate(bucket, m) : null;
+          values: cells.map(function (cell) {
+            var bucket = cell.get(sk);
+            return bucket ? self.aggregate(bucket, m) : null;
           })
         });
       });
@@ -1410,7 +1455,7 @@
       var maxes = {};
       (opts.dataBars || []).forEach(function (k) {
         var col = cols.filter(function (c) { return c.key === k; })[0];
-        if (col) maxes[k] = Math.max.apply(null, data.map(function (r) { return Math.abs(cellVal(r, col)) || 0; }).concat([0]));
+        if (col) maxes[k] = extreme(data.map(function (r) { return Math.abs(cellVal(r, col)) || 0; }), 1) || 0;
       });
       var thead = h('thead', null, h('tr', null, cols.map(function (c) {
         var th = h('th', {
@@ -1492,7 +1537,7 @@
     util: {
       h: h, icon: icon, button: button, escapeHtml: escapeHtml, parseCSV: parseCSV, toCSV: toCSV,
       parseDate: parseDate, isoDate: isoDate, grainKey: grainKey, grainLabel: grainLabel, humanize: humanize,
-      groupBy: groupBy, aggregates: AGGREGATES, renderTable: renderTable, themeTokens: themeTokens,
+      groupBy: groupBy, aggregates: AGGREGATES, extreme: extreme, renderTable: renderTable, themeTokens: themeTokens,
       downloadFile: downloadFile, toast: toast, OTHER: OTHER, BLANK: BLANK
     }
   };

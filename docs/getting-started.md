@@ -18,7 +18,8 @@ cp templates/dashboard.html dashboards/operations.html
 
 Open `dashboards/operations.html` in an editor. There are only two things to change.
 
-**The data.** Replace `<script src="starter-data.js">` with your own data file (see [data.md](data.md)):
+**The data.** The copy opens straight away with the bundled starter data. Replace
+`<script src="../templates/starter-data.js">` with your own data file (see [data.md](data.md)):
 
 ```html
 <script src="operations-data.js"></script>

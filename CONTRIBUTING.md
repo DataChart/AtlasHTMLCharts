@@ -17,11 +17,13 @@ npm install
 npm test
 ```
 
-Tests run Chromium via Playwright. In CI the browser is installed with `npx playwright install --with-deps chromium`;
-locally, set `PW_CHROMIUM_PATH` to use an existing Chromium binary.
+Tests run in Chromium, Firefox and WebKit (Safari's engine) via Playwright, because viewers open dashboards in
+whatever browser they have. Install the engines once with `npx playwright install`. To run a single engine, use
+`npm run test:chromium` or `npx playwright test --project=webkit`; set `PW_CHROMIUM_PATH` to use an existing Chromium binary.
+CI runs all three on every pull request.
 
 ## Pull requests
 
 - One topic per PR; include a gallery example for new visuals and a test for new behaviour.
 - Regenerate sample data with `npm run data` and screenshots with `node scripts/screenshots.mjs` if you change them.
-- Keep the README's feature list and `ROADMAP.md` current.
+- Keep the README's feature list and `ROADMAP.md` current, and add a line to `CHANGELOG.md` under "Unreleased".
