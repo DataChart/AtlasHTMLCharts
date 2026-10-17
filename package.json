@@ -35,7 +35,7 @@
     "test:chromium": "npm run validate && playwright test --project=chromium"
   },
   "devDependencies": {
-    "@playwright/test": "1.56.1",
-    "ajv": "8.17.1"
+    "@playwright/test": "1.64.0",
+    "ajv": "8.20.0"
   }
 }
