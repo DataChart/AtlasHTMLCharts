@@ -678,14 +678,58 @@
     ];
     var label = this.config.toolbar.downloadLabel || 'Download';
     var summary = h('summary', { class: 'atlas-btn', title: 'Download data', 'aria-label': label }, [icon('download'), h('span', { class: 'atlas-btn__label', text: label })]);
-    var panel = h('div', { class: 'atlas-menu__panel', role: 'menu' }, items.map(function (it) {
+    summary.setAttribute('aria-haspopup', 'menu');
+    var panel = h('div', { class: 'atlas-menu__panel', role: 'menu', 'aria-label': label }, items.map(function (it) {
       return h('button', {
-        type: 'button', class: 'atlas-menu__item', role: 'menuitem', text: it[0],
-        onclick: function (e) { it[1](); e.target.closest('details').removeAttribute('open'); }
+        type: 'button', class: 'atlas-menu__item', role: 'menuitem', tabindex: '-1', text: it[0],
+        onclick: function () { it[1](); menu.removeAttribute('open'); summary.focus(); }
       });
     }));
-    return h('details', { class: 'atlas-menu' }, [summary, panel]);
+    var menu = h('details', { class: 'atlas-menu' }, [summary, panel]);
+    popupKeys(menu, summary, panel, '.atlas-menu__item', true);
+    return menu;
   };
+
+  /**
+   * Keyboard support for a <details> popup: Enter, Space or ArrowDown on the summary opens it and focuses the
+   * first item; ArrowUp/ArrowDown/Home/End move between items; Tab out closes it. Escape is handled globally.
+   * focusOnClick also moves focus in after a mouse or touch open (menus); otherwise only after a key opens it,
+   * so a tap never pops up the on-screen keyboard over a search box.
+   */
+  function popupKeys(details, summary, panel, selector, focusOnClick) {
+    var byKey = false;
+    function items() {
+      return Array.prototype.filter.call(panel.querySelectorAll(selector), function (el) {
+        return !el.disabled && !el.closest('[hidden]');
+      });
+    }
+    function focusAt(i) { var list = items(); if (list.length) list[(i + list.length) % list.length].focus(); }
+    summary.addEventListener('keydown', function (e) {
+      var k = e.key;
+      if (k === 'ArrowDown' || k === 'Down' || k === 'ArrowUp' || k === 'Up') {
+        e.preventDefault();
+        var last = k === 'ArrowUp' || k === 'Up';
+        if (details.open) focusAt(last ? -1 : 0);
+        else { byKey = last ? 'last' : 'first'; details.open = true; }
+      } else if (k === 'Enter' || k === ' ' || k === 'Spacebar') byKey = 'first';
+    });
+    details.addEventListener('toggle', function () {
+      if (details.open && (byKey || focusOnClick)) focusAt(byKey === 'last' ? -1 : 0);
+      byKey = false;
+    });
+    panel.addEventListener('keydown', function (e) {
+      var k = e.key, list = items(), i = list.indexOf(document.activeElement);
+      if (k === 'ArrowDown' || k === 'Down') focusAt(i + 1);
+      else if (k === 'ArrowUp' || k === 'Up') focusAt(i < 0 ? -1 : i - 1);
+      else if ((k === 'Home' || k === 'End') && e.target.type !== 'search') focusAt(k === 'Home' ? 0 : -1);
+      else return;
+      e.preventDefault();
+    });
+    // relatedTarget is null when a click lands on something unfocusable inside (Safari), so only a real move out closes.
+    details.addEventListener('focusout', function (e) {
+      if (e.relatedTarget && !details.contains(e.relatedTarget)) details.removeAttribute('open');
+    });
+  }
 
   function serializeRow(r) {
     var o = {};
@@ -859,7 +903,7 @@
           });
           wrap.appendChild(sel);
         } else {
-          wrap.appendChild(multiSelect(values, st, def, changed));
+          wrap.appendChild(multiSelect(values, st, def, changed, labelId));
         }
         break;
       }
@@ -959,7 +1003,7 @@
     return list;
   }
 
-  function multiSelect(values, st, def, changed) {
+  function multiSelect(values, st, def, changed, labelId) {
     var valueText = h('span', { class: 'atlas-dropdown__value' });
     var update = function () {
       var n = st.size;
@@ -984,8 +1028,11 @@
       })
     ]));
     update();
-    var summary = h('summary', null, [valueText, icon('chevron')]);
-    return h('details', { class: 'atlas-dropdown' }, [summary, panel]);
+    valueText.id = labelId + '-value';
+    var summary = h('summary', { 'aria-labelledby': labelId + ' ' + valueText.id }, [valueText, icon('chevron')]);
+    var dropdown = h('details', { class: 'atlas-dropdown' }, [summary, panel]);
+    popupKeys(dropdown, summary, panel, 'input, button', false);
+    return dropdown;
   }
 
   Dashboard.prototype.activeFilterLabels = function () {
