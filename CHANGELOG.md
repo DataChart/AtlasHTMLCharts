@@ -14,6 +14,8 @@ All notable changes to this project are documented here. The format follows
 - `min` / `max` aggregations, table data bars and bubble sizes no longer throw in Safari on more than 65,536 values.
 - The system light/dark switch also re-colours charts in Safari 13.
 - Escape closes an open Download menu or multi-select dropdown and returns focus to its button.
+- The Download menu and multi-select dropdowns work from the keyboard alone: ArrowDown opens them, arrow keys,
+  Home and End move between items, Tab out closes them, and the dropdown button announces its slicer name.
 
 ### Changed
 - Slicers are applied once per refresh and shared by every visual, instead of once per visual.
