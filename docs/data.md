@@ -42,5 +42,5 @@ Force a type with `"fields": { "postcode": { "type": "string" } }`. Empty cells 
   `"cumulative": true`.
 - **Flows.** For a Sankey, either one row per item with a column per stage (`levels`), or an edge list
   with `source`, `target` and a value.
-- **Precompute heavy joins** in your database or Power Query; Atlas aggregates comfortably up to a few hundred
-  thousand rows in the browser.
+- **Precompute heavy joins** in your database or Power Query. Keep a page's data under about 200,000 rows and
+  20 MB; see [Data size and the data it suits](../README.md#data-size-and-the-data-it-suits) for measurements.

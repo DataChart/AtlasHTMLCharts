@@ -21,6 +21,8 @@ All notable changes to this project are documented here. The format follows
 - Browser tests run in Chromium, Firefox and WebKit in CI.
 
 ### Added
+- README section on data size limits (rows, file size and how to estimate it) and the kinds of data Atlas suits,
+  with load and filter timings measured from 25,000 to 1,000,000 rows.
 - Package metadata (`repository`, `bugs`, `homepage`, `engines`), `.editorconfig`, Dependabot for npm and Actions.
 
 ## [0.1.0] - 2026-10-14
